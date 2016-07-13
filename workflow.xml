@@ -1,0 +1,29 @@
+<workflow-app name="bdr-distcp" xmlns="uri:oozie:workflow:0.5">
+    <start to="distcp-action" />
+    <action name="distcp-action">
+        <shell xmlns="uri:oozie:shell-action:0.1">
+            <job-tracker>${resourceManager}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <exec>/bin/bash</exec>
+            <argument>distcp-bdr.sh</argument>
+            <env-var>HADOOP_CLASSPATH=${hcp}</env-var>
+            <env-var>FROM_LOC=${from}</env-var>
+            <env-var>TO_LOC=${to}</env-var>
+            <env-var>KEYTAB_LOCATION=${user}.keytab</env-var>
+            <env-var>KEYTAB_PRINC=${user}</env-var>
+            <file>lib/distcp-5.7.0.jar#distcp-5.7.0.jar</file>
+            <file>lib/distcp_acllib-5.7.0.jar#distcp_acllib-5.7.0.jar</file>
+            <file>lib/${user}.keytab#${user}.keytab</file>
+            <file>scripts/distcp-bdr.sh#distcp-bdr.sh</file>
+            <archive>lib/source-conf.zip#source-conf</archive>
+            <archive>lib/yarn-conf.zip#yarn-conf</archive>
+        </shell>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+
+    <kill name="fail">
+        <message>Script failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <end name='end' />    
+</workflow-app>
